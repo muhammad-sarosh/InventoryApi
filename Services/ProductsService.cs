@@ -11,5 +11,10 @@
                 new ProductDto { Id = 3, Name = "Candy", Price = 50.0m, StockQuantity = 30 }
             };
         }
+
+        public ProductDto? GetProductById(int id)
+        {
+            return GetProducts().FirstOrDefault(p => p.Id == id);
+        }
     }
 }

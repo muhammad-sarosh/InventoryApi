@@ -20,5 +20,18 @@ namespace InventoryApi.Controllers
             var products = _productsService.GetProducts();
             return Ok(products);
         }
+
+        [HttpGet("{id}")]
+        public ActionResult<ProductDto> GetProductById(int id)
+        {
+            var product = _productsService.GetProductById(id);
+
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(product);
+        }
     }
 }
