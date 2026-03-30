@@ -33,5 +33,13 @@ namespace InventoryApi.Controllers
 
             return Ok(product);
         }
+
+        [HttpPost]
+        public ActionResult<ProductDto> AddProduct([FromBody] ProductDto product)
+        {
+            var createdProduct = _productsService.AddProduct(product);
+
+            return CreatedAtAction(nameof(GetProductById), new { id = createdProduct.Id }, createdProduct);
+        }
     }
 }
