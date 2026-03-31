@@ -36,5 +36,18 @@ namespace InventoryApi.Services
             _products.Add(newProduct);
             return newProduct;
         }
+
+        public bool DeleteProduct(int id)
+        {
+            ProductDto? product = _products.FirstOrDefault(p => p.Id == id);
+            
+            if (product == null)
+            {
+                return false;
+            }
+
+            _products.Remove(product);
+            return true;
+        }
     }
 }
