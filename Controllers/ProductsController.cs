@@ -46,8 +46,21 @@ namespace InventoryApi.Controllers
         public IActionResult DeleteProduct(int id)
         {
             bool deleted = _productsService.DeleteProduct(id);
-            
+
             if (!deleted)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult UpdateProduct(int id, [FromBody] ProductDto updatedProduct)
+        {
+            bool updated = _productsService.UpdateProduct(id, updatedProduct);
+
+            if (!updated)
             {
                 return NotFound();
             }
