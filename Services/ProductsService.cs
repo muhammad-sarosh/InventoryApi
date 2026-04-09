@@ -4,6 +4,13 @@ namespace InventoryApi.Services
 {
     public class ProductsService
     {
+        private readonly InventoryDbContext _dbContext;
+
+        public ProductsService(InventoryDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+
         private readonly List<ProductDto> _products = new List<ProductDto>
         {
             new ProductDto { Id = 1, Name = "Chips", Price = 500.0m, StockQuantity = 10 },
@@ -13,12 +20,29 @@ namespace InventoryApi.Services
 
         public List<ProductDto> GetProducts()
         {
-            return _products;
+            return _dbContext.Products
+                .Select(p => new ProductDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Price = p.Price,
+                    StockQuantity = p.StockQuantity
+                })
+                .ToList();
         }
 
         public ProductDto? GetProductById(int id)
         {
-            return _products.FirstOrDefault(p => p.Id == id);
+            return _dbContext.Products
+                .Where(p => p.Id == id)
+                .Select(p => new ProductDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Price = p.Price,
+                    StockQuantity = p.StockQuantity
+                })
+                .FirstOrDefault();
         }
 
         public ProductDto AddProduct(ProductDto product)
