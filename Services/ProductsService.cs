@@ -47,18 +47,23 @@ namespace InventoryApi.Services
 
         public ProductDto AddProduct(ProductDto product)
         {
-            int nextId = _products.Any() ? _products.Max(p => p.Id) + 1 : 1;
-
-            var newProduct = new ProductDto
+            var newProduct = new Product
             {
-                Id = nextId,
                 Name = product.Name,
                 Price = product.Price,
                 StockQuantity = product.StockQuantity
             };
 
-            _products.Add(newProduct);
-            return newProduct;
+            _dbContext.Products.Add(newProduct);
+            _dbContext.SaveChanges();
+
+            return new ProductDto
+            {
+                Id = newProduct.Id,
+                Name = newProduct.Name,
+                Price = newProduct.Price,
+                StockQuantity = newProduct.StockQuantity
+            };
         }
 
         public bool DeleteProduct(int id)
