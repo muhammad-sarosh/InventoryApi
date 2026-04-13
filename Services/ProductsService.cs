@@ -78,10 +78,10 @@ namespace InventoryApi.Services
             _products.Remove(product);
             return true;
         }
-
+        
         public bool UpdateProduct(int id, ProductDto updatedProduct)
         {
-            ProductDto? existingProduct = _products.FirstOrDefault(p => p.Id == id);
+            var existingProduct = _dbContext.Products.FirstOrDefault(p => p.Id == id);
 
             if (existingProduct == null)
             {
@@ -91,6 +91,8 @@ namespace InventoryApi.Services
             existingProduct.Name = updatedProduct.Name;
             existingProduct.Price = updatedProduct.Price;
             existingProduct.StockQuantity = updatedProduct.StockQuantity;
+
+            _dbContext.SaveChanges();
 
             return true;
         }
