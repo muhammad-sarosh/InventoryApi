@@ -68,14 +68,16 @@ namespace InventoryApi.Services
 
         public bool DeleteProduct(int id)
         {
-            ProductDto? product = _products.FirstOrDefault(p => p.Id == id);
-            
-            if (product == null)
+            var existingProduct = _dbContext.Products.FirstOrDefault(p => p.Id == id);
+
+            if (existingProduct == null)
             {
                 return false;
             }
 
-            _products.Remove(product);
+            _dbContext.Products.Remove(existingProduct);
+            _dbContext.SaveChanges();
+
             return true;
         }
         
