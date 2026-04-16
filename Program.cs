@@ -14,6 +14,7 @@ builder.Services.AddScoped<InventoryApi.Services.ProductsService>();
 builder.Services.AddDbContext<InventoryDbContext>(options => {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+builder.Services.AddScoped<InventoryApi.Services.AuthService>();
 
 
 var app = builder.Build();
