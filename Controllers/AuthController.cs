@@ -32,5 +32,24 @@ namespace InventoryApi.Controllers
 
             return Ok("User registered successfully.");
         }
+
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] LoginUserDto loginUserDto)
+        {
+            if (string.IsNullOrWhiteSpace(loginUserDto.Username) ||
+                string.IsNullOrWhiteSpace(loginUserDto.Password))
+            {
+                return BadRequest("Username and password are required.");
+            }
+
+            bool loggedIn = _authService.Login(loginUserDto);
+
+            if (!loggedIn)
+            {
+                return Unauthorized("Invalid username or password.");
+            }
+
+            return Ok("Login successful.");
+        }
     }
 }

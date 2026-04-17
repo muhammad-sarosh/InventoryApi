@@ -35,5 +35,23 @@ namespace InventoryApi.Services
 
             return true;
         }
+
+        public bool Login(LoginUserDto loginUserDto)
+        {
+            var user = _dbContext.Users.FirstOrDefault(u => u.Username == loginUserDto.Username);
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            var result = _passwordHasher.VerifyHashedPassword(
+                    user,
+                    user.PasswordHash,
+                    loginUserDto.Password
+            );
+
+            return result == PasswordVerificationResult.Success;
+        }
     }
 }
