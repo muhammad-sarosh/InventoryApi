@@ -42,14 +42,14 @@ namespace InventoryApi.Controllers
                 return BadRequest("Username and password are required.");
             }
 
-            bool loggedIn = _authService.Login(loginUserDto);
+            var token = _authService.Login(loginUserDto);
 
-            if (!loggedIn)
+            if (token == null)
             {
                 return Unauthorized("Invalid username or password.");
             }
 
-            return Ok("Login successful.");
+            return Ok(new { token });
         }
     }
 }
