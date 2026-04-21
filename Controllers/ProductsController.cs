@@ -36,6 +36,7 @@ namespace InventoryApi.Controllers
             return Ok(product);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public ActionResult<ProductDto> AddProduct([FromBody] ProductDto product)
         {
@@ -44,6 +45,7 @@ namespace InventoryApi.Controllers
             return CreatedAtAction(nameof(GetProductById), new { id = createdProduct.Id }, createdProduct);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public IActionResult DeleteProduct(int id)
         {
@@ -57,6 +59,7 @@ namespace InventoryApi.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public IActionResult UpdateProduct(int id, [FromBody] ProductDto updatedProduct)
         {
