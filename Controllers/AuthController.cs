@@ -1,5 +1,7 @@
-﻿using InventoryApi.Services;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using InventoryApi.Services;
 
 namespace InventoryApi.Controllers
 {
@@ -50,6 +52,22 @@ namespace InventoryApi.Controllers
             }
 
             return Ok(new { token });
+        }
+
+        [Authorize]
+        [HttpGet("me")]
+        public IActionResult Me()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            return Ok(new
+            {
+                Id = userId,
+                Username = username,
+                Role = role
+            });
         }
     }
 }
