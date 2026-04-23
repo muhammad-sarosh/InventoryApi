@@ -1,22 +1,21 @@
 ﻿# InventoryApi
 
-A learning-focused ASP.NET Core Web API project for managing products with JWT-based authentication and role-based authorization.
+ASP.NET Core Web API for product management with Entity Framework Core, SQL Server, JWT authentication, and role-based authorization.
 
 ## Overview
 
-InventoryApi is a backend API built with ASP.NET Core Web API, Entity Framework Core, and SQL Server LocalDB. It supports product CRUD operations, user registration and login, password hashing, JWT token generation, protected endpoints, and admin-only write access for product management.
+InventoryApi is a learning-focused backend project built to practice real API development with ASP.NET Core. It includes product CRUD operations, user registration and login, password hashing, JWT token generation, protected endpoints, and admin-only write access.
 
-This project was built to practice real backend concepts including:
+This project was used to practice:
 
+- ASP.NET Core Web API
 - controllers and routing
 - services and dependency injection
 - Entity Framework Core and migrations
-- authentication vs authorization
-- password hashing
-- JWT token generation and validation
-- role-based access control
-
----
+- SQL Server LocalDB
+- JWT authentication
+- role-based authorization
+- Swagger/OpenAPI testing
 
 ## Features
 
@@ -27,7 +26,7 @@ This project was built to practice real backend concepts including:
 - JWT token generation
 - Authenticated user info endpoint (`/auth/me`)
 
-### Product API
+### Products
 - Get all products
 - Get a product by id
 - Create a product
@@ -38,8 +37,6 @@ This project was built to practice real backend concepts including:
 - Authenticated users can read product data
 - Only users with the `Admin` role can create, update, or delete products
 
----
-
 ## Tech Stack
 
 - ASP.NET Core Web API
@@ -48,8 +45,6 @@ This project was built to practice real backend concepts including:
 - Swagger / OpenAPI
 - JWT Authentication
 - Role-based Authorization
-
----
 
 ## Project Structure
 
@@ -70,32 +65,29 @@ InventoryApi
 ├── Program.cs
 ├── appsettings.json
 └── Migrations
-```
----
+````
 
 ## Authentication Flow
 
 ### Register
 
 A user registers with a username and password.
-
-The password is never stored directly. It is hashed before being saved in the database.
+The password is hashed before being stored in the database.
 
 ### Login
 
-A user logs in with their username and password.
+A user logs in with a username and password.
+If the credentials are valid, the API returns a JWT token.
 
-If the credentials are correct, the API returns a JWT token.
+### Authenticated Requests
 
-### Authorized Requests
-
-The token can then be used to access protected endpoints by sending it in the `Authorization` header as a Bearer token.
+The JWT token must be sent in the `Authorization` header as a Bearer token for protected endpoints.
 
 ### Role-Based Access
 
-The JWT includes the user's role claim. Endpoints marked with admin-only authorization require a token belonging to a user whose role is `Admin`.
-
----
+The JWT includes the user's role claim.
+Users with the `User` role can read product data.
+Users with the `Admin` role can create, update, and delete products.
 
 ## API Endpoints
 
@@ -103,46 +95,107 @@ The JWT includes the user's role claim. Endpoints marked with admin-only authori
 
 #### `POST /auth/register`
 
-Register a new user.
+Registers a new user.
+
+**Responses**
+
+* `200 OK` - registration succeeded
+* `400 Bad Request` - invalid input or username already exists
 
 #### `POST /auth/login`
 
-Log in and receive a JWT token.
+Logs in a user and returns a JWT token.
+
+**Responses**
+
+* `200 OK` - login succeeded
+* `401 Unauthorized` - invalid username or password
 
 #### `GET /auth/me`
 
-Get the current authenticated user's id, username, and role from the JWT claims.
+Returns the current authenticated user's id, username, and role from JWT claims.
 
----
+**Authorization**
+
+* Requires a valid JWT
+
+**Responses**
+
+* `200 OK`
+* `401 Unauthorized`
 
 ### Products
 
 #### `GET /products`
 
-Get all products.
-Requires authentication.
+Returns all products.
+
+**Authorization**
+
+* Requires a valid JWT
+
+**Responses**
+
+* `200 OK`
+* `401 Unauthorized`
 
 #### `GET /products/{id}`
 
-Get a product by id.
-Requires authentication.
+Returns a single product by id.
+
+**Authorization**
+
+* Requires a valid JWT
+
+**Responses**
+
+* `200 OK`
+* `404 Not Found`
+* `401 Unauthorized`
 
 #### `POST /products`
 
-Create a product.
-Requires `Admin` role.
+Creates a product.
+
+**Authorization**
+
+* Requires `Admin` role
+
+**Responses**
+
+* `201 Created`
+* `401 Unauthorized`
+* `403 Forbidden`
 
 #### `PUT /products/{id}`
 
-Update a product.
-Requires `Admin` role.
+Updates a product by id.
+
+**Authorization**
+
+* Requires `Admin` role
+
+**Responses**
+
+* `204 No Content`
+* `404 Not Found`
+* `401 Unauthorized`
+* `403 Forbidden`
 
 #### `DELETE /products/{id}`
 
-Delete a product.
-Requires `Admin` role.
+Deletes a product by id.
 
----
+**Authorization**
+
+* Requires `Admin` role
+
+**Responses**
+
+* `204 No Content`
+* `404 Not Found`
+* `401 Unauthorized`
+* `403 Forbidden`
 
 ## How to Run
 
@@ -161,7 +214,7 @@ dotnet restore
 
 ### 3. Check the connection string
 
-Make sure `appsettings.json` contains a valid LocalDB connection string, for example:
+Make sure `appsettings.json` contains a valid SQL Server LocalDB connection string, for example:
 
 ```json
 "ConnectionStrings": {
@@ -191,9 +244,8 @@ Or run it from Visual Studio.
 
 ### 6. Open Swagger
 
-When the API starts, Swagger should open automatically. If not, open the Swagger URL shown in the browser or terminal.
-
----
+Swagger should open automatically when the API starts.
+If not, open the local Swagger URL shown by the app.
 
 ## Using Swagger with JWT
 
@@ -204,17 +256,15 @@ When the API starts, Swagger should open automatically. If not, open the Swagger
 5. Paste the token
 6. Call protected endpoints
 
----
-
 ## Admin Access
 
-By default, registered users are created with the role:
+Newly registered users are created with the default role:
 
 ```text
 User
 ```
 
-To test admin-only product write operations, update a user’s role in the database manually.
+To test admin-only product write operations, update a user's role in the database manually.
 
 Example SQL:
 
@@ -224,63 +274,28 @@ SET Role = 'Admin'
 WHERE Username = 'your_username';
 ```
 
-After changing the role, log in again to get a new token with the updated role claim.
-
----
+After changing the role, log in again to generate a new token with the updated role claim.
 
 ## Database
 
 This project uses Entity Framework Core with SQL Server LocalDB.
 
-Current tables include:
+Current tables:
 
 * `Products`
 * `Users`
 * `__EFMigrationsHistory`
 
-Products are stored in the database through EF Core.
+Products are stored through EF Core.
 Users are stored with hashed passwords and role information.
-
----
 
 ## Notes
 
 * JWT tokens are signed using a secret key from `appsettings.json`
-* Passwords are hashed before storage
+* Passwords are never stored in plain text
 * Product read endpoints require authentication
 * Product write endpoints require admin authorization
 
----
-
-## Future Improvements
-
-Possible next improvements for this project:
-
-* separate request/response DTOs more cleanly
-* stronger validation and error responses
-* refresh tokens
-* token expiration/refresh flow
-* automatic admin seeding
-* deployment to Azure or Render
-* unit and integration tests
-
----
-
-## Learning Goals Covered
-
-This project covers practical backend concepts such as:
-
-* REST API design
-* controllers and routes
-* services and dependency injection
-* EF Core setup and migrations
-* JWT authentication
-* password hashing
-* authorization with roles
-* protected endpoints
-
----
-
 ## License
 
-This project is for portfolio purposes.
+This project is for learning and portfolio purposes.
