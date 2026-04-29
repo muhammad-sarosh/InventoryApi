@@ -1,21 +1,41 @@
 ﻿# InventoryApi
 
-ASP.NET Core Web API for product management with Entity Framework Core, SQL Server, JWT authentication, and role-based authorization.
+ASP.NET Core Web API for inventory management with JWT authentication, role-based authorization, Azure SQL, Azure App Service deployment, and a separate frontend client.
 
 ## Overview
 
-InventoryApi is a learning-focused backend project built to practice real API development with ASP.NET Core. It includes product CRUD operations, user registration and login, password hashing, JWT token generation, protected endpoints, and admin-only write access.
+InventoryApi is a backend project built with ASP.NET Core Web API to practice real API development and deployment. It includes:
 
-This project was used to practice:
+- user registration and login
+- password hashing
+- JWT token generation and validation
+- protected endpoints
+- role-based authorization
+- product CRUD operations
+- Entity Framework Core migrations
+- Azure SQL database
+- Azure App Service deployment
+- CORS configuration for a separate frontend
+
+This project was built to practice:
 
 - ASP.NET Core Web API
 - controllers and routing
 - services and dependency injection
 - Entity Framework Core and migrations
-- SQL Server LocalDB
+- SQL Server / Azure SQL
 - JWT authentication
 - role-based authorization
-- Swagger/OpenAPI testing
+- deployment to Azure
+- frontend/backend integration
+
+## Live Demo
+
+### Backend API
+`https://inventoryapi-c9c8d2erf9fyfvec.uaenorth-01.azurewebsites.net`
+
+### Frontend
+`https://stockpad.vercel.app/`
 
 ## Features
 
@@ -37,14 +57,28 @@ This project was used to practice:
 - Authenticated users can read product data
 - Only users with the `Admin` role can create, update, or delete products
 
+### Deployment
+- Backend deployed to Azure App Service
+- Database deployed to Azure SQL
+- Frontend deployed separately
+- CORS enabled for frontend/backend communication
+
 ## Tech Stack
 
+### Backend
 - ASP.NET Core Web API
 - Entity Framework Core
-- SQL Server LocalDB
-- Swagger / OpenAPI
+- SQL Server / Azure SQL
 - JWT Authentication
 - Role-based Authorization
+- Swagger / OpenAPI
+
+### Hosting
+- Azure App Service
+- Azure SQL Database
+
+### Frontend
+- Separate deployed frontend client
 
 ## Project Structure
 
@@ -56,15 +90,16 @@ InventoryApi
 ├── Services
 │   ├── AuthService.cs
 │   └── ProductsService.cs
+├── Migrations
+├── InventoryDbContext.cs
 ├── Product.cs
 ├── ProductDto.cs
 ├── RegisterUserDto.cs
 ├── LoginUserDto.cs
 ├── User.cs
-├── InventoryDbContext.cs
 ├── Program.cs
 ├── appsettings.json
-└── Migrations
+└── appsettings.Development.example.json
 ````
 
 ## Authentication Flow
@@ -81,13 +116,18 @@ If the credentials are valid, the API returns a JWT token.
 
 ### Authenticated Requests
 
-The JWT token must be sent in the `Authorization` header as a Bearer token for protected endpoints.
+Protected endpoints require a JWT token in the `Authorization` header:
+
+```http
+Authorization: Bearer <your_token>
+```
 
 ### Role-Based Access
 
 The JWT includes the user's role claim.
-Users with the `User` role can read product data.
-Users with the `Admin` role can create, update, and delete products.
+
+* `User` can read product data
+* `Admin` can create, update, and delete products
 
 ## API Endpoints
 
@@ -99,8 +139,8 @@ Registers a new user.
 
 **Responses**
 
-* `200 OK` - registration succeeded
-* `400 Bad Request` - invalid input or username already exists
+* `200 OK`
+* `400 Bad Request`
 
 #### `POST /auth/login`
 
@@ -108,12 +148,12 @@ Logs in a user and returns a JWT token.
 
 **Responses**
 
-* `200 OK` - login succeeded
-* `401 Unauthorized` - invalid username or password
+* `200 OK`
+* `401 Unauthorized`
 
 #### `GET /auth/me`
 
-Returns the current authenticated user's id, username, and role from JWT claims.
+Returns the current authenticated user's id, username, and role.
 
 **Authorization**
 
@@ -197,7 +237,7 @@ Deletes a product by id.
 * `401 Unauthorized`
 * `403 Forbidden`
 
-## How to Run
+## Running Locally
 
 ### 1. Clone the repository
 
@@ -212,13 +252,22 @@ cd InventoryApi
 dotnet restore
 ```
 
-### 3. Check the connection string
+### 3. Configure local settings
 
-Make sure `appsettings.json` contains a valid SQL Server LocalDB connection string, for example:
+Create or update `appsettings.Development.json` with your local development settings.
+
+Example:
 
 ```json
-"ConnectionStrings": {
-  "DefaultConnection": "Server=(localdb)\\MSSQLLocalDB;Database=InventoryApiDb;Trusted_Connection=True;TrustServerCertificate=True;"
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=(localdb)\\MSSQLLocalDB;Database=InventoryApiDb;Trusted_Connection=True;TrustServerCertificate=True;"
+  },
+  "Jwt": {
+    "Key": "your-local-development-secret-key",
+    "Issuer": "InventoryApi",
+    "Audience": "InventoryApiUsers"
+  }
 }
 ```
 
@@ -228,13 +277,13 @@ Make sure `appsettings.json` contains a valid SQL Server LocalDB connection stri
 Update-Database
 ```
 
-Or with the .NET CLI:
+Or:
 
 ```bash
 dotnet ef database update
 ```
 
-### 5. Run the project
+### 5. Run the API
 
 ```bash
 dotnet run
@@ -242,19 +291,42 @@ dotnet run
 
 Or run it from Visual Studio.
 
-### 6. Open Swagger
+### 6. Open Swagger locally
 
-Swagger should open automatically when the API starts.
-If not, open the local Swagger URL shown by the app.
+Swagger is available in local development mode.
 
-## Using Swagger with JWT
+## Running in Production
 
-1. Register a user with `POST /auth/register`
-2. Log in with `POST /auth/login`
-3. Copy the returned JWT token
-4. Click the **Authorize** button in Swagger
-5. Paste the token
-6. Call protected endpoints
+The deployed Azure app uses environment variables for configuration, including:
+
+* `ConnectionStrings__DefaultConnection`
+* `Jwt__Key`
+* `Jwt__Issuer`
+* `Jwt__Audience`
+* `ASPNETCORE_ENVIRONMENT=Production`
+
+In production:
+
+* the root URL may return `404` if no `/` route is mapped
+* Swagger is not exposed by default
+* the API is intended to be used by the deployed frontend or direct API requests
+
+## Frontend Integration
+
+The frontend is hosted separately and communicates with the API over HTTP requests.
+
+Important points:
+
+* the frontend stores the JWT after login
+* the JWT is sent in the `Authorization` header for protected endpoints
+* CORS is enabled on the backend for allowed frontend origins
+
+## Example Authenticated Request
+
+```bash
+curl https://inventoryapi-c9c8d2erf9fyfvec.uaenorth-01.azurewebsites.net/Auth/me \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE"
+```
 
 ## Admin Access
 
@@ -264,9 +336,7 @@ Newly registered users are created with the default role:
 User
 ```
 
-To test admin-only product write operations, update a user's role in the database manually.
-
-Example SQL:
+To test admin-only endpoints, update a user's role in the database manually:
 
 ```sql
 UPDATE Users
@@ -278,9 +348,12 @@ After changing the role, log in again to generate a new token with the updated r
 
 ## Database
 
-This project uses Entity Framework Core with SQL Server LocalDB.
+This project uses Entity Framework Core with SQL Server.
 
-Current tables:
+Development can use LocalDB.
+Production uses Azure SQL Database.
+
+Current tables include:
 
 * `Products`
 * `Users`
@@ -291,7 +364,7 @@ Users are stored with hashed passwords and role information.
 
 ## Notes
 
-* JWT tokens are signed using a secret key from `appsettings.json`
+* JWT tokens are signed using a secret key from configuration
 * Passwords are never stored in plain text
 * Product read endpoints require authentication
 * Product write endpoints require admin authorization
@@ -299,3 +372,4 @@ Users are stored with hashed passwords and role information.
 ## License
 
 This project is for learning and portfolio purposes.
+
