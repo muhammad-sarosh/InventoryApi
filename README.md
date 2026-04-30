@@ -78,7 +78,9 @@ This project was built to practice:
 - Azure SQL Database
 
 ### Frontend
-- Separate deployed frontend client
+- React
+- Tailwind CSS
+- Vite
 
 ## Project Structure
 
